@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -88,6 +89,41 @@ public class ProjectController {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
     return recommendations.recommend(project, limit);
+  }
+
+  // Doar proprietarul poate edita proiectul (inclusiv linkul de repository).
+  @PatchMapping("/{id}")
+  public ProjectDto update(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable Long id,
+      @Valid @RequestBody UpdateProjectRequest req) {
+    Project project =
+        projects
+            .findByIdAndOwnerId(id, currentUserId(jwt))
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
+    if (req.title() != null) {
+      String title = req.title().trim();
+      if (title.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Titlul nu poate fi gol.");
+      }
+      project.setTitle(title);
+    }
+    if (req.description() != null) {
+      project.setDescription(req.description().trim());
+    }
+    if (req.summary() != null) {
+      String summary = req.summary().trim();
+      project.setSummary(summary.isEmpty() ? null : summary);
+    }
+    if (req.repositoryUrl() != null) {
+      String url = req.repositoryUrl().trim();
+      project.setRepositoryUrl(url.isEmpty() ? null : url);
+    }
+    if (req.maxHourlyRate() != null) {
+      project.setMaxHourlyRate(req.maxHourlyRate());
+    }
+    return ProjectDto.from(projects.save(project));
   }
 
   private static Long currentUserId(Jwt jwt) {

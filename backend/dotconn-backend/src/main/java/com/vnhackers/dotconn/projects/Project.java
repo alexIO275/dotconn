@@ -61,6 +61,9 @@ public class Project {
   @Column(precision = 10, scale = 2)
   private BigDecimal maxHourlyRate;
 
+  @Column(length = 500)
+  private String repositoryUrl;
+
   @Column(nullable = false, updatable = false)
   private Instant createdAt = Instant.now();
 
@@ -141,6 +144,14 @@ public class Project {
 
   public void setMaxHourlyRate(BigDecimal maxHourlyRate) {
     this.maxHourlyRate = maxHourlyRate;
+  }
+
+  public String getRepositoryUrl() {
+    return repositoryUrl;
+  }
+
+  public void setRepositoryUrl(String repositoryUrl) {
+    this.repositoryUrl = repositoryUrl;
   }
 
   public Instant getCreatedAt() {

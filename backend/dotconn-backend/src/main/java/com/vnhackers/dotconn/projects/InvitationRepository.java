@@ -1,12 +1,16 @@
 // Repository pentru invitații, cu căutări pe proiect și pe invitat (pentru verificări de acces).
 package com.vnhackers.dotconn.projects;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
+  List<Invitation> findByProjectId(Long projectId);
+
+  List<Invitation> findByProjectIdAndStatus(Long projectId, InvitationStatus status);
   Page<Invitation> findByInviteeId(Long inviteeId, Pageable pageable);
 
   Page<Invitation> findByInviteeIdAndStatus(Long inviteeId, InvitationStatus status, Pageable pageable);
