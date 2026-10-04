@@ -1,4 +1,4 @@
-package com.example.codematch.auth;
+package com.vnhackers.dotconn.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,3 +1,12 @@
+package com.vnhackers.dotconn.config;
+
+import com.vnhackers.dotconn.user.User;
+import com.vnhackers.dotconn.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 @Component
 public class UserSeeder implements CommandLineRunner {
   private final UserRepository users;

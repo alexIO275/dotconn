@@ -1,3 +1,3 @@
-package com.example.codematch.auth;
+package com.vnhackers.dotconn.auth;
 
 public record AuthResponse(String token, long expiresInSeconds) {}
