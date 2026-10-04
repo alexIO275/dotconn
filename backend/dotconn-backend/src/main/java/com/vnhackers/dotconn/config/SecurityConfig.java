@@ -41,6 +41,8 @@ public class SecurityConfig {
       .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
           .requestMatchers("/api/auth/login", "/api/auth/signup", "/actuator/health").permitAll()
+          // Browserele nu pot trimite Authorization la handshake; JWT-ul e verificat la STOMP CONNECT.
+          .requestMatchers("/ws").permitAll()
           .anyRequest().authenticated())
       .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
     return http.build();
