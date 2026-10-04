@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>MicroCrew — Găsește colegul pentru proiectul tău</title>
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="/" aria-label="MicroCrew, pagina principală"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>MicroCrew</a>
+    <nav aria-label="Cont"><a href="/login" class="auth login" id="login-button">Login</a><a href="/register" class="auth register" id="register-button">Register</a></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <div class="connection" aria-hidden="true"><span>&lt;/&gt;</span><svg viewBox="0 0 96 24"><path d="M0 12h96"/><circle cx="48" cy="12" r="4"/></svg><span>{ }</span></div>
+      <h1 id="title">De ce ai nevoie?</h1>
+      <p>Tu ai ideea. Găsește programatorul cu care o construiești.</p>
+      <div class="project-input"><label for="project">Descrie proiectul și colegul pe care îl cauți</label><textarea id="project" name="project" rows="3" placeholder="Fac frontendul unei aplicații și caut un coleg pentru backend…"></textarea><span class="input-note">Un proiect bun începe cu o conexiune.</span></div>
+      <div class="suggestions" aria-label="Sugestii de rol"><button type="button" data-role="Frontend">Frontend</button><button type="button" data-role="Backend">Backend</button><button type="button" data-role="Full-stack">Full-stack</button></div>
+    </section>
+  </main>
+  <footer>Construiește împreună.</footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
