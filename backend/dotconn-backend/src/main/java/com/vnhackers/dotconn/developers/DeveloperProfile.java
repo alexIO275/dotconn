@@ -1,3 +1,4 @@
+// Entitatea JPA care stochează profilul public al unui programator legat 1-la-1 de User.
 package com.vnhackers.dotconn.developers;
 
 import com.vnhackers.dotconn.user.User;

@@ -1,3 +1,4 @@
+// DTO detaliat returnat pentru un singur profil de programator.
 package com.vnhackers.dotconn.developers;
 
 import java.math.BigDecimal;

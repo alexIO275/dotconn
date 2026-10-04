@@ -1,3 +1,4 @@
+// Definește rolurile de programator expuse în API (frontend, backend, full-stack).
 package com.vnhackers.dotconn.developers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

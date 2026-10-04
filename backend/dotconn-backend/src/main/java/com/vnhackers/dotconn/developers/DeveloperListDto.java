@@ -1,3 +1,4 @@
+// DTO compact returnat în lista paginată de programatori.
 package com.vnhackers.dotconn.developers;
 
 import java.math.BigDecimal;

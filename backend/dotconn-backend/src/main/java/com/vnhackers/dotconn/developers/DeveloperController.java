@@ -1,3 +1,4 @@
+// Controller public (autentificat) pentru listarea și vizualizarea profilurilor de programatori.
 package com.vnhackers.dotconn.developers;
 
 import jakarta.persistence.criteria.JoinType;
