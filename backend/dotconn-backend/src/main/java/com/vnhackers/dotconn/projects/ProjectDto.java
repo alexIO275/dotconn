@@ -15,6 +15,7 @@ public record ProjectDto(
     List<String> existingStack,
     List<String> requiredTechnologies,
     BigDecimal maxHourlyRate,
+    String repositoryUrl,
     Instant createdAt) {
   public static ProjectDto from(Project p) {
     return new ProjectDto(
@@ -27,6 +28,7 @@ public record ProjectDto(
         List.copyOf(p.getExistingStack()),
         List.copyOf(p.getRequiredTechnologies()),
         p.getMaxHourlyRate(),
+        p.getRepositoryUrl(),
         p.getCreatedAt());
   }
 }
