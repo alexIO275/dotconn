@@ -1,4 +1,4 @@
-// Definește rolurile de programator expuse în API (frontend, backend, full-stack).
+// Definește rolurile de programator expuse în API (aliniate cu analiza de proiect: 8 roluri).
 package com.vnhackers.dotconn.developers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -7,11 +7,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum DeveloperRole {
   FRONTEND("frontend"),
   BACKEND("backend"),
-  FULL_STACK("full-stack");
-  MOBILE("mobile");
-  DEVOPS("devops");
-  QA("qa");
-  DATA("data");
+  FULL_STACK("full-stack"),
+  MOBILE("mobile"),
+  DEVOPS("devops"),
+  QA("qa"),
+  DATA("data"),
   SECURITY("security");
   private final String slug;
 
