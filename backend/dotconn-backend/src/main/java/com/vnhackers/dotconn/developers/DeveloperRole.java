@@ -8,7 +8,11 @@ public enum DeveloperRole {
   FRONTEND("frontend"),
   BACKEND("backend"),
   FULL_STACK("full-stack");
-
+  MOBILE("mobile");
+  DEVOPS("devops");
+  QA("qa");
+  DATA("data");
+  SECURITY("security");
   private final String slug;
 
   DeveloperRole(String slug) {
@@ -30,6 +34,6 @@ public enum DeveloperRole {
         return role;
       }
     }
-    throw new IllegalArgumentException("Rol invalid. Valori acceptate: frontend, backend, full-stack.");
+    throw new IllegalArgumentException("Rol invalid. Valori acceptate: frontend, backend, full-stack, mobile, devops, qa, data, security.");
   }
 }
