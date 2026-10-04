@@ -1,4 +1,6 @@
 import './style.css';
+import { setupAnalysis } from './analysis';
+import { authenticate, clearSession, getToken } from './auth';
 
 const main = document.querySelector<HTMLElement>('main')!;
 const landing = main.innerHTML;
@@ -11,6 +13,14 @@ function renderPage() {
     if (link.pathname === path) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
+  const nav = document.querySelector<HTMLElement>('nav')!;
+  nav.querySelector('#logout-button')?.remove();
+  nav.querySelectorAll<HTMLAnchorElement>('a').forEach(link => { link.hidden = Boolean(getToken()); });
+  if (getToken()) {
+    const logout = document.createElement('button'); logout.type = 'button'; logout.id = 'logout-button'; logout.className = 'auth login'; logout.textContent = 'Logout';
+    logout.addEventListener('click', () => { clearSession(); history.pushState(null, '', '/'); renderPage(); });
+    nav.append(logout);
+  }
   document.title = isAuth ? `${isRegister ? 'Register' : 'Login'} — MicroCrew` : 'MicroCrew — Găsește colegul pentru proiectul tău';
 
   if (!isAuth) {
@@ -23,6 +33,7 @@ function renderPage() {
         input.setSelectionRange(input.value.length, input.value.length);
       });
     });
+    setupAnalysis();
     return;
   }
 
@@ -32,10 +43,9 @@ function renderPage() {
       <h1 id="auth-title">${isRegister ? 'Hai să construim.' : 'Bine ai revenit.'}</h1>
       <p class="auth-description">${isRegister ? 'Creează un cont și găsește colegul pentru următorul proiect.' : 'Intră în cont și continuă proiectele tale.'}</p>
       <form id="auth-form">
-        ${isRegister ? '<div class="field"><label for="name">Nume</label><input id="name" name="name" type="text" autocomplete="name" placeholder="Numele tău" required maxlength="100"></div>' : ''}
         <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="nume@exemplu.ro" required></div>
-        <div class="field"><label for="password">Parolă</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="${isRegister ? 'new-password' : 'current-password'}" ${isRegister ? 'minlength="8" aria-describedby="password-help"' : ''} required><button type="button" class="password-toggle" aria-controls="password" aria-pressed="false">Arată</button></div>${isRegister ? '<small id="password-help">Minimum 8 caractere.</small>' : ''}</div>
-        ${isRegister ? '<div class="field"><label for="confirm-password">Confirmă parola</label><input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8"></div>' : ''}
+        <div class="field"><label for="password">Parolă</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="${isRegister ? 'new-password' : 'current-password'}" ${isRegister ? 'minlength="8" maxlength="72" aria-describedby="password-help"' : ''} required><button type="button" class="password-toggle" aria-controls="password" aria-pressed="false">Arată</button></div>${isRegister ? '<small id="password-help">Între 8 și 72 de caractere.</small>' : ''}</div>
+        ${isRegister ? '<div class="field"><label for="confirm-password">Confirmă parola</label><input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></div>' : ''}
         <button type="submit" class="auth register submit-button">${isRegister ? 'Creează cont' : 'Intră în cont'}</button>
         <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
       </form>
@@ -55,18 +65,25 @@ function renderPage() {
     toggle.setAttribute('aria-pressed', String(show));
   });
   function validateFields() {
-    const name = document.querySelector<HTMLInputElement>('#name');
-    name?.setCustomValidity(name.value.trim() ? '' : 'Introdu numele tău.');
     confirm?.setCustomValidity(confirm.value && confirm.value !== password.value ? 'Parolele nu coincid.' : '');
   }
   form.addEventListener('input', () => { validateFields(); status.textContent = ''; });
-  form.addEventListener('submit', (event) => {
+  let pending = false;
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (pending) return;
     validateFields();
     if (!form.reportValidity()) return;
-    // Integration point: call the authentication backend here.
-    // Until connected, no credentials are sent or stored.
-    status.textContent = 'Formularul este valid. Autentificarea va fi disponibilă după conectarea la server.';
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    pending = true; submit.disabled = true; status.textContent = 'Se verifică…';
+    try {
+      const email = document.querySelector<HTMLInputElement>('#email')!.value.trim();
+      await authenticate(isRegister ? 'signup' : 'login', email, password.value);
+      password.value = ''; if (confirm) confirm.value = '';
+      history.pushState(null, '', '/'); renderPage();
+      const heading = document.querySelector<HTMLElement>('main h1'); heading?.setAttribute('tabindex', '-1'); heading?.focus();
+    } catch (error) { status.textContent = error instanceof Error ? error.message : 'Autentificarea a eșuat.'; }
+    finally { pending = false; submit.disabled = false; }
   });
 }
 

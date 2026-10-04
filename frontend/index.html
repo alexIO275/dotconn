@@ -16,7 +16,8 @@
       <div class="connection" aria-hidden="true"><span>&lt;/&gt;</span><svg viewBox="0 0 96 24"><path d="M0 12h96"/><circle cx="48" cy="12" r="4"/></svg><span>{ }</span></div>
       <h1 id="title">De ce ai nevoie?</h1>
       <p>Tu ai ideea. Găsește programatorul cu care o construiești.</p>
-      <div class="project-input"><label for="project">Descrie proiectul și colegul pe care îl cauți</label><textarea id="project" name="project" rows="3" placeholder="Fac frontendul unei aplicații și caut un coleg pentru backend…"></textarea><span class="input-note">Un proiect bun începe cu o conexiune.</span></div>
+      <form id="analysis-form"><div class="project-input"><label for="project">Descrie proiectul și colegul pe care îl cauți</label><textarea id="project" name="project" rows="3" required minlength="20" maxlength="5000" placeholder="Fac frontendul unei aplicații și caut un coleg pentru backend…"></textarea><span class="input-note">Un proiect bun începe cu o conexiune.</span></div>
+      <button type="submit" class="auth register analyze-button">Analizează proiectul</button><p id="analysis-status" role="status" aria-live="polite"></p></form><section id="analysis-result" class="analysis-result" hidden aria-label="Analiza proiectului"></section>
       <div class="suggestions" aria-label="Sugestii de rol"><button type="button" data-role="Frontend">Frontend</button><button type="button" data-role="Backend">Backend</button><button type="button" data-role="Full-stack">Full-stack</button></div>
     </section>
   </main>
