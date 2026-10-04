@@ -1,3 +1,4 @@
+// Controller pentru vizualizarea și editarea (PATCH) profilului propriu al utilizatorului logat.
 package com.vnhackers.dotconn.developers;
 
 import com.vnhackers.dotconn.user.UserRepository;

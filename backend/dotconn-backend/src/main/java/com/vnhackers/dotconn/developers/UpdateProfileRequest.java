@@ -1,3 +1,4 @@
+// DTO validat pentru actualizarea parțială (PATCH) a profilului propriu.
 package com.vnhackers.dotconn.developers;
 
 import jakarta.validation.constraints.DecimalMin;

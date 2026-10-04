@@ -1,3 +1,4 @@
+// Teste de integrare pentru fluxul complet al API-ului de profiluri de programatori.
 package com.vnhackers.dotconn.developers;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;

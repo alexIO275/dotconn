@@ -1,3 +1,4 @@
+// Definește nivelurile de disponibilitate ale unui programator pentru colaborări.
 package com.vnhackers.dotconn.developers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
