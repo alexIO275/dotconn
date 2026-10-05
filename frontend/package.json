@@ -44,7 +44,8 @@
       "dist/**/*",
       "dist-electron/**/*",
       "package.json",
-      "build/icon.png"
+      "build/icon.png",
+      "build/icon.svg"
     ],
     "asar": true,
     "mac": {

@@ -78,7 +78,7 @@ async function openStripe(value: unknown) {
 function createWindow() {
   const window = new BrowserWindow({
     title: 'MicroCrew', width: 1280, height: 860, minWidth: 840, minHeight: 620,
-    show: false, backgroundColor: '#ffffff', icon: join(app.getAppPath(), 'build/icon.png'),
+    show: false, backgroundColor: '#ffffff', icon: join(app.getAppPath(), 'build/icon.svg'),
     webPreferences: { preload: join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true,
       nodeIntegration: false, webSecurity: true, webviewTag: false, devTools: !app.isPackaged, navigateOnDragDrop: false },
   });
@@ -138,7 +138,7 @@ else {
       if (!trustedRenderer(event)) throw new Error('Fereastră neautorizată.');
       return shell.openExternal(externalUrl(value));
     });
-    if (process.platform === 'darwin') app.dock?.setIcon(join(app.getAppPath(), 'build/icon.png'));
+    if (process.platform === 'darwin') app.dock?.setIcon(join(app.getAppPath(), 'build/icon.svg'));
     installMenu(); createWindow();
     app.on('activate', () => { if (!mainWindow) createWindow(); });
   }).catch(error => { dialog.showErrorBox('MicroCrew nu a pornit', error instanceof Error ? error.message : 'Eroare de pornire.'); app.quit(); });

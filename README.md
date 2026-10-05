@@ -322,6 +322,33 @@ Deschide `http://127.0.0.1:5173/`. Vite proxiaza `/api` catre `http://127.0.0.1:
 
 Cu backendul pornit, ruleaza din `frontend` comanda `npm run dev:desktop` pentru Electron cu hot reload, sau `npm run start:desktop` pentru interfata construita fara Vite. `npm run package:desktop` produce aplicatia locala in `frontend/release`, iar `npm run dist:desktop` genereaza distributia pentru platforma curenta. Backendul Spring si baza de date raman servicii separate; nu sunt incluse in installer.
 
+Iconita ferestrei foloseste `frontend/build/icon.svg`, iar installerul foloseste `frontend/build/icon.png` (raster 2048x2048 al aceluiasi desen, cerut de electron-builder).
+
+#### Build desktop pe Windows / macOS / Linux
+
+Cerinte comune: Node 22.12+ + npm, backendul pornit separat (`./run-local.sh` pe Linux/macOS, `mvnw.cmd` pe Windows, vezi mai jos). Iconitele/fisierele generate (`dist`, `dist-electron`, `release`) sunt ignorate de Git.
+
+```sh
+cd frontend
+npm ci
+npm run build:desktop    # verificare: vite build + tsc electron
+npm run package:desktop  # app neimpachetata in frontend/release, pentru test local
+npm run dist:desktop     # installer pentru OS-ul pe care rulezi buildul
+```
+
+| OS build | Comanda | Rezultat in `frontend/release/` |
+| --- | --- | --- |
+| Linux | `npm run dist:desktop -- --linux` | `*.AppImage` (target `AppImage`, categorie `Development`) |
+| Windows | `npm run dist:desktop -- --win` | `*.exe` NSIS (`oneClick: false`, se poate alege directorul) |
+| macOS | `npm run dist:desktop -- --mac` | `*.dmg` + `*.zip`; cu `package:desktop`: `release/mac-arm64/MicroCrew.app` |
+
+Note pe platforme:
+
+- Linux: `chmod +x *.AppImage` apoi ruleaza direct. Pe Ubuntu/Debian poate fi necesar `libfuse2` pentru AppImage.
+- Windows: ruleaza buildul pe Windows. Backend: `cd backend\dotconn-backend` apoi `mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local` sau `mvnw.cmd test` / `mvnw.cmd package` (necesita JDK 25).
+- macOS: buildul local foloseste semnare ad-hoc (`identity: "-"`). Distributia publica necesita certificat Developer ID + notarizare, neconfigurate in repo. Buildurile Windows/Linux nu au fost executate pe Macul de referinta.
+- Cross-build (ex. installer Windows din Linux) nu este recomandat local; fa buildul pe OS-ul tinta sau intr-un CI cu matrice `windows-latest / macos-latest / ubuntu-latest`. `npm run dist:desktop` fara flag face automat tinta OS-ului curent.
+
 Configurarea serverului, fluxul Stripe desktop si instructiunile de distribuire sunt descrise in [DESKTOP.md](DESKTOP.md).
 
 Teste backend (H2 in-memory izolat):
@@ -404,3 +431,28 @@ npm run build
 ```
 
 Scenariile manuale pentru demo sunt descrise in [DEMO.md](DEMO.md).
+
+## Mediu de dezvoltare si tehnologii utilizate
+
+IDE-uri:
+
+- Atom (backend) (da, atom-ul ala mort din 2022)
+- Antigravity (backend)
+- Neovim (frontend)
+
+Agenti AI:
+
+- Claude (Basic, Code) - backend si retusari backend + frontend
+- Codex - frontend si o parte din backend
+- Muse Spark 1.3 Free - backend si retusari backend + frontend
+
+Limbaje si frameworkuri:
+
+- Frontend: TypeScript (~5.9) cu Vite 7 si Electron 44, fara framework UI (nu React - renderer vanilla TS + History API router). Comunicatie realtime cu `@stomp/stompjs`, proxy dev cu `http-proxy`, impachetare cu `electron-builder`.
+- Backend: Java 25 cu Spring Boot 4.1.1 (`webmvc`, `data-jpa`, `validation`, `security` + `oauth2-resource-server` JWT HS256, `websocket` STOMP, `actuator`, `restclient`), build cu Maven wrapper (`mvnw` / `mvnw.cmd`).
+
+Completari (componente efectiv folosite in repo, cf. `pom.xml` / `package.json`):
+
+- Baze de date: MySQL 8.4 (profil implicit / `mysql-local`) + H2 (profil `local` si teste)
+- Servicii externe: Groq API (`openai/gpt-oss-20b` structured output) pentru analiza, Stripe test (`stripe-java 34.0.0`) pentru abonamente
+- Runtime/tooling: Node 22.12+ + npm, JDK 25, Maven 3.9.x via wrapper, electron-builder 26.x (AppImage / NSIS / DMG+ZIP)
