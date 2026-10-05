@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu, session, shell, type IpcMainInvokeEvent, type MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, session, shell, type IpcMainInvokeEvent, type MenuItemConstructorOptions } from 'electron';
 import { join } from 'node:path';
 import { billingReturnPath, contentSecurityPolicy, externalUrl, serviceOrigin, stripeUrl } from './policy.cjs';
 import { startDesktopServer } from './server.cjs';
@@ -36,7 +36,7 @@ async function openStripe(value: unknown) {
   paymentSession.setPermissionCheckHandler(() => false);
   const window = new BrowserWindow({
     title: 'MicroCrew — Stripe TEST', width: 1040, height: 820, minWidth: 600, minHeight: 600,
-    parent: mainWindow || undefined, show: false, backgroundColor: '#ffffff',
+    parent: mainWindow || undefined, show: false, backgroundColor: nativeTheme.shouldUseDarkColors ? '#0f1626' : '#ffffff',
     webPreferences: { session: paymentSession, sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true, webviewTag: false, devTools: !app.isPackaged },
   });
   paymentWindow = window;
@@ -78,7 +78,7 @@ async function openStripe(value: unknown) {
 function createWindow() {
   const window = new BrowserWindow({
     title: 'MicroCrew', width: 1280, height: 860, minWidth: 840, minHeight: 620,
-    show: false, backgroundColor: '#ffffff', icon: join(app.getAppPath(), 'build/icon.svg'),
+    show: false, backgroundColor: nativeTheme.shouldUseDarkColors ? '#0f1626' : '#ffffff', icon: join(app.getAppPath(), 'build/icon.svg'),
     webPreferences: { preload: join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true,
       nodeIntegration: false, webSecurity: true, webviewTag: false, devTools: !app.isPackaged, navigateOnDragDrop: false },
   });

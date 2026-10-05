@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <script>try{var t=localStorage.getItem('microcrew-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}</script>
   <title>MicroCrew — Găsește colegul pentru proiectul tău</title>
 </head>
 <body>
@@ -12,6 +13,7 @@
     <a class="brand" href="/" aria-label="MicroCrew, pagina principală"><img class="brand-mark" src="/icon.svg" alt="" aria-hidden="true">MicroCrew</a>
     <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Deschide meniul"><span aria-hidden="true"></span></button>
     <nav id="site-nav" aria-label="Cont"><a href="/login" class="auth login" id="login-button">Login</a><a href="/register" class="auth register" id="register-button">Register</a></nav>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Comută la tema întunecată">dark</button>
   </header>
   <main>
     <section class="intro" aria-labelledby="title">

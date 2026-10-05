@@ -1,4 +1,6 @@
 import './style.css';
+import './theme.css';
+import { initTheme } from './theme';
 import { setupAnalysis } from './analysis';
 import { authenticate, clearSession, getToken } from './auth';
 import { renderBasic } from './pages';
@@ -159,5 +161,6 @@ document.addEventListener('click', (event) => {
   document.querySelector<HTMLElement>('main h1')?.focus();
 });
 window.addEventListener('popstate', renderPage);
+initTheme();
 setupDesktop(navigate);
 renderPage();

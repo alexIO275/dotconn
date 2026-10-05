@@ -1,0 +1,89 @@
+/* Dark mode: suprascrie variabilele temei + culorile hardcodate deschise. */
+:root { color-scheme: light; }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #0f1626;
+  --ink: #e8edf6;
+  --muted: #9aa7bd;
+  --blue: #7aa0ff;
+  --line: #26324a;
+  --wash: #162032;
+}
+
+:root[data-theme='dark'] body { background: var(--paper); color: var(--ink); }
+:root[data-theme='dark'] .header { background: var(--paper); }
+
+/* Butonul de tema din header. */
+.theme-toggle {
+  min-width: 64px; height: 44px; padding: 0 14px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--paper); color: var(--ink); cursor: pointer;
+  font-size: 13px; font-weight: 600;
+}
+.theme-toggle:hover { background: var(--wash); border-color: var(--blue); }
+
+/* Fundaluri hardcodate in stilurile light. */
+:root[data-theme='dark'] .login,
+:root[data-theme='dark'] .workspace-button,
+:root[data-theme='dark'] .billing-button,
+:root[data-theme='dark'] .field input,
+:root[data-theme='dark'] .field select,
+:root[data-theme='dark'] .field textarea,
+:root[data-theme='dark'] .menu-toggle,
+:root[data-theme='dark'] .landing-steps li,
+:root[data-theme='dark'] .landing-team,
+:root[data-theme='dark'] .dev-card,
+:root[data-theme='dark'] .skeleton-card,
+:root[data-theme='dark'] .chat-conversation,
+:root[data-theme='dark'] .invitation-card,
+:root[data-theme='dark'] .team-package,
+:root[data-theme='dark'] .billing-plan {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+:root[data-theme='dark'] .login:hover,
+:root[data-theme='dark'] .workspace-button:hover,
+:root[data-theme='dark'] .billing-button:hover { background: var(--wash); }
+:root[data-theme='dark'] .field input::placeholder { color: var(--muted); }
+
+/* Pastile/badges deschise care ar straluci pe fundal inchis. */
+:root[data-theme='dark'] .dev-avatar,
+:root[data-theme='dark'] .dev-role,
+:root[data-theme='dark'] .tags span,
+:root[data-theme='dark'] .connection > span,
+:root[data-theme='dark'] .chat-conversations { background: var(--wash); color: var(--ink); }
+:root[data-theme='dark'] .billing-mode { background: var(--wash); border-color: var(--line); }
+:root[data-theme='dark'] .billing-mode.test { background: #16233d; border-color: #33477a; }
+:root[data-theme='dark'] .billing-mode > span { color: var(--muted); }
+:root[data-theme='dark'] .analysis-result { background: var(--wash); }
+:root[data-theme='dark'] .chat-message { background: var(--wash); color: var(--ink); }
+:root[data-theme='dark'] .workspace-progress-track,
+:root[data-theme='dark'] .billing-progress { background: var(--line); }
+
+/* Umbrele albastre deschise sunt invizibile pe dark; folosim contur. */
+:root[data-theme='dark'] .dev-card:hover,
+:root[data-theme='dark'] .landing-steps li:hover { box-shadow: none; border-color: var(--blue); }
+:root[data-theme='dark'] .landing-team { box-shadow: none; }
+
+/* Skeleton shimmer pe fundal inchis. */
+:root[data-theme='dark'] .skeleton-card span {
+  background: linear-gradient(90deg, #1a2540 25%, #232f4d 50%, #1a2540 75%);
+}
+
+/* Chat: fundaluri albe hardcodate + stari de selectie. */
+:root[data-theme='dark'] .chat-thread,
+:root[data-theme='dark'] .chat-compose,
+:root[data-theme='dark'] .chat-compose textarea,
+:root[data-theme='dark'] .project-chat .chat-history,
+:root[data-theme='dark'] .chat-avatar { background: var(--paper); color: var(--ink); border-color: var(--line); }
+:root[data-theme='dark'] .chat-conversation:hover { background: var(--wash); }
+:root[data-theme='dark'] .chat-conversation.selected { background: #1a2a4d; box-shadow: inset 3px 0 var(--blue); }
+:root[data-theme='dark'] .chat-message-own { background: #1a2a4d; color: var(--ink); }
+:root[data-theme='dark'] .chat-compose textarea:focus { box-shadow: 0 0 0 2px #7aa0ff33; }
+
+/* Billing: planul curent + etichete deschise. */
+:root[data-theme='dark'] .billing-plan.current { background: #141f38; }
+:root[data-theme='dark'] .billing-current-tag { background: #1a2a4d; color: var(--blue); }
+:root[data-theme='dark'] .billing-progress { background: var(--line); }
