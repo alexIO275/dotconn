@@ -26,7 +26,18 @@ function loginReturnTarget() {
   return '/projects';
 }
 
+const header = document.querySelector<HTMLElement>('.header')!;
+const menuToggle = document.querySelector<HTMLButtonElement>('.menu-toggle')!;
+function setMenu(open: boolean) { header.classList.toggle('menu-open', open); menuToggle.setAttribute('aria-expanded', String(open)); menuToggle.setAttribute('aria-label', open ? 'Închide meniul' : 'Deschide meniul'); }
+menuToggle.addEventListener('click', () => setMenu(!header.classList.contains('menu-open')));
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && header.classList.contains('menu-open')) { setMenu(false); menuToggle.focus(); } });
+
+const pageTitles: [RegExp, string][] = [[/^\/projects$/, 'Proiectele mele'], [/^\/projects\/new$/, 'Proiect nou'], [/^\/projects\/\d+$/, 'Workspace'], [/^\/developers$/, 'Programatori'], [/^\/developers\/\d+$/, 'Profil programator'], [/^\/invitations$/, 'Invitațiile mele'], [/^\/chat(\/\d+)?$/, 'Mesaje'], [/^\/profile$/, 'Profilul meu']];
+
 function renderPage() {
+  setMenu(false);
+  // Old links and typed URLs use /messages; the chat lives at /chat.
+  if (/^\/messages\/?$/.test(location.pathname)) history.replaceState(null, '', '/chat');
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const isRegister = path === '/register';
   const isAuth = isRegister || path === '/login';
@@ -46,7 +57,7 @@ function renderPage() {
   if (path === '/pricing') { document.title = 'Abonamente — MicroCrew'; void renderBilling(page, navigate); return; }
   if (path !== '/' && !isAuth) {
     if (!getToken()) { const loginHref = path === '/billing' ? `/login?next=${encodeURIComponent(path + location.search)}` : '/login'; page.innerHTML = `<section class="auth-page"><h1>Intră în cont.</h1><p>Autentifică-te pentru a continua.</p><a class="auth register" href="${escape(loginHref)}">Login</a></section>`; return; }
-    document.title = 'Workspace — MicroCrew';
+    document.title = `${pageTitles.find(([pattern]) => pattern.test(path))?.[1] || 'Pagina nu există'} — MicroCrew`;
     if (path === '/billing') { document.title = 'Abonamentul meu — MicroCrew'; void renderBilling(page, navigate, true); }
     else if (/^\/projects\/\d+$/.test(path)) void renderWorkspace(page, Number(path.split('/')[2]), navigate);
     else if (path === '/invitations') void renderInvitations(page, navigate);
@@ -67,6 +78,7 @@ function renderPage() {
         input.setSelectionRange(input.value.length, input.value.length);
       });
     });
+    page.querySelector('[data-focus-project]')?.addEventListener('click', () => { input.scrollIntoView({ behavior: 'smooth', block: 'center' }); input.focus({ preventScroll: true }); });
     setupAnalysis(page);
     return;
   }
@@ -138,7 +150,7 @@ document.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
   const link = target.closest<HTMLAnchorElement>('a[href]');
-  if (!link || link.origin !== location.origin || !( ['/', '/login', '/register', '/profile', '/developers', '/projects', '/projects/new', '/invitations', '/chat', '/pricing', '/billing'].includes(link.pathname) || /^\/(developers|projects|chat)\/\d+$/.test(link.pathname))) return;
+  if (!link || link.origin !== location.origin || !( ['/', '/login', '/register', '/profile', '/developers', '/projects', '/projects/new', '/invitations', '/chat', '/messages', '/pricing', '/billing'].includes(link.pathname) || /^\/(developers|projects|chat)\/\d+$/.test(link.pathname))) return;
   event.preventDefault();
   history.pushState(null, '', link.pathname + link.search);
   renderPage();

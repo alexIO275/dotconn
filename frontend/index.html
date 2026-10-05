@@ -9,7 +9,8 @@
 <body>
   <header class="header">
     <a class="brand" href="/" aria-label="MicroCrew, pagina principală"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>MicroCrew</a>
-    <nav aria-label="Cont"><a href="/login" class="auth login" id="login-button">Login</a><a href="/register" class="auth register" id="register-button">Register</a></nav>
+    <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Deschide meniul"><span aria-hidden="true"></span></button>
+    <nav id="site-nav" aria-label="Cont"><a href="/login" class="auth login" id="login-button">Login</a><a href="/register" class="auth register" id="register-button">Register</a></nav>
   </header>
   <main>
     <section class="intro" aria-labelledby="title">
@@ -19,6 +20,39 @@
       <form id="analysis-form"><div class="project-input"><label for="project">Descrie proiectul și colegul pe care îl cauți</label><textarea id="project" name="project" rows="3" required minlength="20" maxlength="5000" placeholder="Fac frontendul unei aplicații și caut un coleg pentru backend…"></textarea><span class="input-note">Un proiect bun începe cu o conexiune.</span></div>
       <button type="submit" class="auth register analyze-button">Analizează proiectul</button><p id="analysis-status" role="status" aria-live="polite"></p></form><section id="analysis-result" class="analysis-result" hidden aria-label="Analiza proiectului"></section>
       <div class="suggestions" aria-label="Sugestii de rol"><button type="button" data-role="Frontend">Frontend</button><button type="button" data-role="Backend">Backend</button><button type="button" data-role="Full-stack">Full-stack</button></div>
+    </section>
+    <section class="landing-section" aria-labelledby="steps-title">
+      <p class="eyebrow">Cum funcționează</p>
+      <h2 id="steps-title">De la idee la echipă, în trei pași</h2>
+      <ol class="landing-steps">
+        <li><span class="landing-step-number">1</span><h3>Descrii proiectul</h3><p>Spui în cuvintele tale ce vrei să construiești și ce ai deja.</p></li>
+        <li><span class="landing-step-number">2</span><h3>AI-ul identifică rolurile</h3><p>Primești rolurile necesare, sarcinile și întrebările despre ce lipsește. Tu verifici și corectezi.</p></li>
+        <li><span class="landing-step-number">3</span><h3>Primești echipa</h3><p>Până la trei echipe complete, cu scoruri și explicații. Inviți echipa și lucrați împreună.</p></li>
+      </ol>
+    </section>
+    <section class="landing-section landing-split" aria-labelledby="teams-title">
+      <div>
+        <p class="eyebrow">Echipe, nu freelanceri</p>
+        <h2 id="teams-title">Oameni care se completează, nu persoane izolate</h2>
+        <p class="landing-lead">AI-ul identifică necesarul, iar platforma alege oamenii din profiluri reale: rol, tehnologii, disponibilitate și tarif. Dacă nu se poate forma o echipă, îți spune exact ce rol lipsește.</p>
+        <ul class="landing-checks">
+          <li>Workspace comun cu sarcini și progres</li>
+          <li>Repository și contract API pentru lucru în paralel</li>
+          <li>Chat privat și de proiect, în timp real</li>
+        </ul>
+      </div>
+      <figure class="landing-team" aria-label="Exemplu de echipă propusă">
+        <figcaption><strong>Echipa recomandată</strong><span>Exemplu ilustrativ</span></figcaption>
+        <div class="landing-member"><span class="landing-avatar">FE</span><div><strong>Frontend</strong><small>TypeScript · React · disponibil</small></div><span class="landing-score">94</span></div>
+        <div class="landing-member"><span class="landing-avatar backend">BE</span><div><strong>Backend</strong><small>Java · Spring · MySQL</small></div><span class="landing-score">91</span></div>
+        <div class="landing-member"><span class="landing-avatar qa">QA</span><div><strong>QA / testare</strong><small>Playwright · JUnit</small></div><span class="landing-score">88</span></div>
+        <p class="landing-team-note">Fiecare programator confirmă separat invitația.</p>
+      </figure>
+    </section>
+    <section class="landing-section landing-cta" aria-labelledby="cta-title">
+      <h2 id="cta-title">Gata să-ți găsești echipa?</h2>
+      <p>Descrie proiectul și vezi ce specialiști îți trebuie.</p>
+      <div class="landing-cta-actions"><button type="button" class="auth register" data-focus-project>Descrie proiectul</button><a class="auth login" href="/developers">Vezi programatorii</a></div>
     </section>
   </main>
   <footer>Construiește împreună.</footer>
