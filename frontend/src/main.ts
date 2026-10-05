@@ -5,11 +5,26 @@ import { renderBasic } from './pages';
 import { renderWorkspace, renderInvitations } from './workspace';
 import { renderChat, cleanupChat } from './chat';
 import { escape } from './ui';
+import { renderBilling, cleanupBilling } from './billing';
+import { setupDesktop } from './desktop';
 
 const main = document.querySelector<HTMLElement>('main')!;
 const landing = main.innerHTML;
 function navigate(path: string) { history.pushState(null, '', path); renderPage(); window.scrollTo(0, 0); }
-window.addEventListener('session-expired', () => { cleanupChat(); });
+window.addEventListener('session-expired', () => {
+  cleanupChat(); cleanupBilling();
+  if (['/billing', '/pricing'].includes(location.pathname)) renderPage();
+});
+
+function loginReturnTarget() {
+  const requested = new URLSearchParams(location.search).get('next');
+  if (!requested) return '/projects';
+  try {
+    const target = new URL(requested, location.origin);
+    if (target.origin === location.origin && ['/billing', '/pricing'].includes(target.pathname)) return target.pathname + target.search;
+  } catch { /* Invalid return paths use the normal projects page. */ }
+  return '/projects';
+}
 
 function renderPage() {
   const path = window.location.pathname.replace(/\/$/, '') || '/';
@@ -21,16 +36,19 @@ function renderPage() {
   });
   const nav = document.querySelector<HTMLElement>('nav')!;
   cleanupChat();
+  cleanupBilling();
   nav.innerHTML = getToken()
-    ? '<a class="auth login" href="/projects">Proiecte</a><a class="auth login" href="/developers">Programatori</a><a class="auth login" href="/invitations">Invitații</a><a class="auth login" href="/chat">Mesaje</a><a class="auth login" href="/profile">Profil</a><button type="button" id="logout-button" class="auth login">Logout</button>'
-    : '<a class="auth login" href="/login">Login</a><a class="auth register" href="/register">Register</a>';
+    ? '<a class="auth login" href="/projects">Proiecte</a><a class="auth login" href="/developers">Programatori</a><a class="auth login" href="/invitations">Invitații</a><a class="auth login" href="/chat">Mesaje</a><a class="auth login" href="/profile">Profil</a><a class="auth login" href="/billing">Abonamente</a><button type="button" id="logout-button" class="auth login">Logout</button>'
+    : '<a class="auth login" href="/pricing">Abonamente</a><a class="auth login" href="/login">Login</a><a class="auth register" href="/register">Register</a>';
   nav.querySelector('#logout-button')?.addEventListener('click', () => { clearSession(); navigate('/'); });
   nav.querySelectorAll<HTMLAnchorElement>('a').forEach(link => { if (link.pathname === path || path.startsWith(link.pathname + '/')) link.setAttribute('aria-current', 'page'); });
   main.replaceChildren(); const page = document.createElement('div'); page.className = 'route-page'; main.append(page);
+  if (path === '/pricing') { document.title = 'Abonamente — MicroCrew'; void renderBilling(page, navigate); return; }
   if (path !== '/' && !isAuth) {
-    if (!getToken()) { page.innerHTML = '<section class="auth-page"><h1>Intră în cont.</h1><p>Autentifică-te pentru a continua.</p><a class="auth register" href="/login">Login</a></section>'; return; }
+    if (!getToken()) { const loginHref = path === '/billing' ? `/login?next=${encodeURIComponent(path + location.search)}` : '/login'; page.innerHTML = `<section class="auth-page"><h1>Intră în cont.</h1><p>Autentifică-te pentru a continua.</p><a class="auth register" href="${escape(loginHref)}">Login</a></section>`; return; }
     document.title = 'Workspace — MicroCrew';
-    if (/^\/projects\/\d+$/.test(path)) void renderWorkspace(page, Number(path.split('/')[2]), navigate);
+    if (path === '/billing') { document.title = 'Abonamentul meu — MicroCrew'; void renderBilling(page, navigate, true); }
+    else if (/^\/projects\/\d+$/.test(path)) void renderWorkspace(page, Number(path.split('/')[2]), navigate);
     else if (path === '/invitations') void renderInvitations(page, navigate);
     else if (path === '/chat' || /^\/chat\/\d+$/.test(path)) void renderChat(page, path === '/chat' ? null : Number(path.split('/')[2]), navigate);
     else void renderBasic(page, path, navigate);
@@ -53,6 +71,8 @@ function renderPage() {
     return;
   }
 
+  const loginTarget = loginReturnTarget();
+  const authReturnSuffix = loginTarget !== '/projects' ? `?next=${encodeURIComponent(loginTarget)}` : '';
   page.innerHTML = `
     <section class="auth-page" aria-labelledby="auth-title">
       <a class="back-link" href="/">Înapoi la pagina principală</a>
@@ -65,7 +85,7 @@ function renderPage() {
         <button type="submit" class="auth register submit-button">${isRegister ? 'Creează cont' : 'Intră în cont'}</button>
         <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
       </form>
-      <p class="switch-auth">${isRegister ? 'Ai deja un cont? <a href="/login">Login</a>' : 'Nu ai încă un cont? <a href="/register">Register</a>'}</p>
+      <p class="switch-auth">${isRegister ? `Ai deja un cont? <a href="/login${authReturnSuffix}">Login</a>` : `Nu ai încă un cont? <a href="/register${authReturnSuffix}">Register</a>`}</p>
     </section>`;
 
   if (!isRegister) {
@@ -104,7 +124,8 @@ function renderPage() {
       const email = document.querySelector<HTMLInputElement>('#email')!.value.trim();
       await authenticate(isRegister ? 'signup' : 'login', email, password.value);
       password.value = ''; if (confirm) confirm.value = '';
-      navigate('/projects');
+      if (!page.isConnected) return;
+      navigate(loginTarget);
       const heading = document.querySelector<HTMLElement>('main h1'); heading?.setAttribute('tabindex', '-1'); heading?.focus();
     } catch (error) { status.textContent = error instanceof Error ? error.message : 'Autentificarea a eșuat.'; }
     finally { pending = false; submit.disabled = false; }
@@ -117,13 +138,14 @@ document.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
   const link = target.closest<HTMLAnchorElement>('a[href]');
-  if (!link || link.origin !== location.origin || !( ['/', '/login', '/register', '/profile', '/developers', '/projects', '/projects/new', '/invitations', '/chat'].includes(link.pathname) || /^\/(developers|projects|chat)\/\d+$/.test(link.pathname))) return;
+  if (!link || link.origin !== location.origin || !( ['/', '/login', '/register', '/profile', '/developers', '/projects', '/projects/new', '/invitations', '/chat', '/pricing', '/billing'].includes(link.pathname) || /^\/(developers|projects|chat)\/\d+$/.test(link.pathname))) return;
   event.preventDefault();
-  history.pushState(null, '', link.pathname);
+  history.pushState(null, '', link.pathname + link.search);
   renderPage();
   window.scrollTo(0, 0);
   document.querySelector<HTMLElement>('main h1')?.setAttribute('tabindex', '-1');
   document.querySelector<HTMLElement>('main h1')?.focus();
 });
 window.addEventListener('popstate', renderPage);
+setupDesktop(navigate);
 renderPage();

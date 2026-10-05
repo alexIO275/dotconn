@@ -59,6 +59,12 @@ Pentru fluxul complet: client → Shop local → propune și invită echipa → 
 
 Proiectele sunt deja create manual. **Groq nu este necesar pentru aceste scenarii.** Analiza unei descrieri noi cu AI necesită separat `GROQ_API_KEY` în mediul backendului; cheia nu se pune în frontend și nu se salvează în Git.
 
+## Demonstrarea abonamentelor
+
+Pagina `/pricing` prezintă Free și cele trei produse Stripe existente: Bronze 9,99 USD, Silver 19,99 USD și Gold 34,99 USD pe lună. Limitele de analize AI reușite sunt 3 / 25 / 50 / 200 pe lună calendaristică UTC și se aplică în backend. Proiectele, echipele și chatul sunt accesibile și fără abonament plătit.
+
+Fluxul Stripe rulează exclusiv în modul de test: checkout găzduit de Stripe → confirmare pe server → plan salvat în cont → administrare în Customer Portal. Cardurile și tranzacțiile de test nu transferă bani reali. Configurarea și scenariul complet sunt în [BILLING.md](BILLING.md).
+
 ## Persistență
 
 Seed-ul creează datele într-o singură tranzacție și salvează markerul `microcrew-demo-v1` în tabelul `demo_seed_runs`. La restart nu dublează conturi, proiecte, invitații, mesaje sau sarcini și nu resetează modificările făcute în demo. Dezactivarea opțiunii oprește seed-ul; datele create rămân în baza locală.

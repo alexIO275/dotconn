@@ -22,6 +22,7 @@ export function setupAnalysis(root: HTMLElement) {
     const token = getToken();
     if (!token) { status.textContent = 'Intră în cont sau creează un cont pentru a analiza proiectul.'; return; }
     const description = input.value.trim();
+    let quotaExceeded = false;
     const controller = new AbortController();
     pending = true; button.disabled = true; button.textContent = 'Se analizează…';
     status.textContent = ''; result.hidden = true;
@@ -31,7 +32,12 @@ export function setupAnalysis(root: HTMLElement) {
       if (!response.ok) {
         if (response.status === 401) clearSession();
         let message = response.status === 401 || response.status === 403 ? 'Sesiunea a expirat sau accesul a fost refuzat. Intră din nou în cont.' : 'Analiza nu este disponibilă. Verifică dacă backendul este pornit și Groq este configurat.';
-        try { const error = await response.json(); if (typeof error.message === 'string') message = error.message; } catch { /* The proxy may return plain text. */ }
+        try {
+          const error = await response.json();
+          if (typeof error.message === 'string') message = error.message;
+          else if (typeof error.detail === 'string') message = error.detail;
+          quotaExceeded = error.code === 'analysis_quota_exceeded';
+        } catch { /* The proxy may return plain text. */ }
         throw new Error(message);
       }
       const data: unknown = await response.json();
@@ -51,7 +57,12 @@ export function setupAnalysis(root: HTMLElement) {
       save.addEventListener('click',()=>setDraft({description,summary:data.summary,roles:data.roles,tasks:data.tasks,existingStack:data.existingStack})); result.append(save);
       result.hidden = false; status.textContent = 'Verifică analiza înainte să cauți un coleg.';
     } catch (error) {
+      if (!root.isConnected) return;
       status.textContent = controller.signal.aborted ? 'Analiza a durat prea mult. Încearcă din nou.' : error instanceof Error ? error.message : 'Analiza nu a putut fi finalizată.';
+      if (quotaExceeded) {
+        const plans = document.createElement('a'); plans.href = '/billing'; plans.textContent = 'Vezi abonamentele';
+        status.append(' ', plans);
+      }
     } finally { clearTimeout(timer); pending = false; button.disabled = false; button.textContent = 'Analizează proiectul'; }
   });
   input.addEventListener('input', () => input.setCustomValidity(''));

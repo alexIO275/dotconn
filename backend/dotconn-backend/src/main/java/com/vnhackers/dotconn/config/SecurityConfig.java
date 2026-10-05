@@ -40,7 +40,7 @@ public class SecurityConfig {
       .cors(Customizer.withDefaults())
       .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
-          .requestMatchers("/api/auth/login", "/api/auth/signup", "/actuator/health", "/api/demo").permitAll()
+          .requestMatchers("/api/auth/login", "/api/auth/signup", "/actuator/health", "/api/demo", "/api/billing/plans", "/api/billing/webhook").permitAll()
           // Browserele nu pot trimite Authorization la handshake; JWT-ul e verificat la STOMP CONNECT.
           .requestMatchers("/ws").permitAll()
           .anyRequest().authenticated())

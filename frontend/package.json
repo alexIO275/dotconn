@@ -1,18 +1,77 @@
 {
-  "name": "dotconn-frontend",
+  "name": "microcrew-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:desktop": "npm run build:electron && node scripts/desktop-dev.mjs",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build:desktop": "npm run build && npm run build:electron",
+    "start:desktop": "npm run build:desktop && electron .",
+    "test:desktop": "npm run build:electron && node --test tests/desktop.test.mjs",
+    "package:desktop": "npm run build:desktop && electron-builder --dir",
+    "dist:desktop": "npm run build:desktop && electron-builder"
   },
   "devDependencies": {
+    "@types/http-proxy": "1.17.17",
+    "@types/node": "24.19.1",
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3",
     "typescript": "~5.9.3",
     "vite": "^7.1.0"
   },
   "dependencies": {
-    "@stomp/stompjs": "^7.3.0"
+    "@stomp/stompjs": "^7.3.0",
+    "http-proxy": "1.18.1"
+  },
+  "description": "MicroCrew — echipe de programatori și workspace comun",
+  "main": "dist-electron/main.cjs",
+  "author": "MicroCrew",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "build": {
+    "appId": "ro.microcrew.desktop",
+    "productName": "MicroCrew",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "build/icon.png"
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development",
+      "icon": "build/icon.png"
+    }
   }
 }
