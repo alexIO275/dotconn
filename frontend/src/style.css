@@ -42,3 +42,6 @@
 @media(prefers-reduced-motion:reduce){.skeleton-card span{animation:none}.landing-steps li,.dev-card{transition:none}}
 @media(max-width:900px){.header{flex-wrap:wrap;align-items:center}.menu-toggle{display:inline-flex}.header nav{display:none;width:100%;flex-direction:column;align-items:stretch;gap:4px;padding-top:8px}.header.menu-open nav{display:flex}.header nav .auth{justify-content:flex-start;padding:12px 14px;font-size:15px}}
 @media(max-width:760px){.landing-section{margin-top:72px}.landing-steps,.landing-split{grid-template-columns:1fr}.landing-split{gap:36px}.landing-cta{padding:44px 20px}}
+/* Brand logo: SVG din public/icon.svg (copie a build/icon.svg). */
+img.brand-mark{width:27px;height:27px;display:block;object-fit:contain;flex-shrink:0}
+img.brand-mark:before,img.brand-mark:after{content:none!important}
