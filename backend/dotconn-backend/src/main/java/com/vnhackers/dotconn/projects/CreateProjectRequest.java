@@ -15,7 +15,7 @@ public record CreateProjectRequest(
     @NotBlank @Size(min = 20, max = 5000) String description,
     @Size(max = 1000) String summary,
     @NotNull @Size(min = 1, max = 8) List<
-            @Pattern(
+            @NotBlank @Pattern(
                 regexp = "frontend|backend|full-stack|mobile|devops|qa|data|security",
                 message = "Rol invalid.") String>
         roles,

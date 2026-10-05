@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,11 +41,12 @@ public class Project {
 
   @ElementCollection
   @CollectionTable(name = "project_roles", joinColumns = @JoinColumn(name = "project_id"))
+  @OrderColumn(name = "position")
   @Column(name = "role", length = 20)
   private List<String> roles = new ArrayList<>();
 
   @ElementCollection
-  @CollectionTable(name = "project_tasks", joinColumns = @JoinColumn(name = "project_id"))
+  @CollectionTable(name = "project_task_descriptions", joinColumns = @JoinColumn(name = "project_id"))
   @Column(name = "task", length = 500)
   private List<String> tasks = new ArrayList<>();
 
@@ -63,6 +65,9 @@ public class Project {
 
   @Column(length = 500)
   private String repositoryUrl;
+
+  @Column(columnDefinition = "text")
+  private String apiContract;
 
   @Column(nullable = false, updatable = false)
   private Instant createdAt = Instant.now();
@@ -153,6 +158,10 @@ public class Project {
   public void setRepositoryUrl(String repositoryUrl) {
     this.repositoryUrl = repositoryUrl;
   }
+
+  public String getApiContract() { return apiContract; }
+
+  public void setApiContract(String apiContract) { this.apiContract = apiContract; }
 
   public Instant getCreatedAt() {
     return createdAt;

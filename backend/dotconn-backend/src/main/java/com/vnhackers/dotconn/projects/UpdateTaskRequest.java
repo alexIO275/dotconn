@@ -9,4 +9,5 @@ public record UpdateTaskRequest(
     @Size(max = 2000, message = "Descrierea poate avea cel mult 2000 de caractere.")
         String description,
     TaskStatus status,
-    @Positive(message = "Id-ul asignatului este invalid.") Long assigneeId) {}
+    @Positive(message = "Id-ul asignatului este invalid.") Long assigneeId,
+    Boolean clearAssignee) {}

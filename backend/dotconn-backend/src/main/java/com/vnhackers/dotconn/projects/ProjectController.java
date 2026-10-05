@@ -1,4 +1,4 @@
-// Controller pentru proiecte + recomandări; toate rutele cer JWT, proiectele sunt vizibile doar ownerului.
+// Proiectele sunt vizibile proprietarului și membrilor acceptați; recomandările și editarea rămân la proprietar.
 package com.vnhackers.dotconn.projects;
 
 import com.vnhackers.dotconn.user.User;
@@ -22,19 +22,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/projects")
+@Transactional
 public class ProjectController {
   private final ProjectRepository projects;
   private final UserRepository users;
   private final RecommendationService recommendations;
+  private final ProjectAccessService access;
 
   public ProjectController(
-      ProjectRepository projects, UserRepository users, RecommendationService recommendations) {
+      ProjectRepository projects, UserRepository users, RecommendationService recommendations, ProjectAccessService access) {
     this.projects = projects;
     this.users = users;
     this.recommendations = recommendations;
+    this.access = access;
   }
 
   @PostMapping
@@ -67,15 +71,12 @@ public class ProjectController {
   public Page<ProjectDto> list(
       @AuthenticationPrincipal Jwt jwt,
       @PageableDefault(size = 20, sort = "id") Pageable pageable) {
-    return projects.findByOwnerId(currentUserId(jwt), pageable).map(ProjectDto::from);
+    return projects.findVisibleTo(currentUserId(jwt), pageable).map(ProjectDto::from);
   }
 
   @GetMapping("/{id}")
   public ProjectDto getById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
-    return projects
-        .findByIdAndOwnerId(id, currentUserId(jwt))
-        .map(ProjectDto::from)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
+    return ProjectDto.from(access.requireMember(id, currentUserId(jwt)));
   }
 
   @GetMapping("/{id}/recommendations")
@@ -97,11 +98,10 @@ public class ProjectController {
       @AuthenticationPrincipal Jwt jwt,
       @PathVariable Long id,
       @Valid @RequestBody UpdateProjectRequest req) {
-    Project project =
-        projects
-            .findByIdAndOwnerId(id, currentUserId(jwt))
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
+    Long ownerId = currentUserId(jwt);
+    Project project = projects.findByIdForUpdate(id)
+        .filter(p -> p.getOwner().getId().equals(ownerId))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
     if (req.title() != null) {
       String title = req.title().trim();
       if (title.isEmpty()) {
@@ -120,7 +120,14 @@ public class ProjectController {
       String url = req.repositoryUrl().trim();
       project.setRepositoryUrl(url.isEmpty() ? null : url);
     }
-    if (req.maxHourlyRate() != null) {
+    if (req.apiContract() != null) {
+      String contract = req.apiContract().trim();
+      project.setApiContract(contract.isEmpty() ? null : contract);
+    }
+    if (req.roles() != null) project.setRoles(cleanStrings(req.roles()));
+    if (req.requiredTechnologies() != null) project.setRequiredTechnologies(cleanStrings(req.requiredTechnologies()));
+    if (Boolean.TRUE.equals(req.clearMaxHourlyRate())) project.setMaxHourlyRate(null);
+    else if (req.maxHourlyRate() != null) {
       project.setMaxHourlyRate(req.maxHourlyRate());
     }
     return ProjectDto.from(projects.save(project));

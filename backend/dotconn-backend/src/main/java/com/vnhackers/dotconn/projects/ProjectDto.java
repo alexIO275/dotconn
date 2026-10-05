@@ -7,6 +7,7 @@ import java.util.List;
 
 public record ProjectDto(
     Long id,
+    Long ownerId,
     String title,
     String description,
     String summary,
@@ -16,10 +17,12 @@ public record ProjectDto(
     List<String> requiredTechnologies,
     BigDecimal maxHourlyRate,
     String repositoryUrl,
+    String apiContract,
     Instant createdAt) {
   public static ProjectDto from(Project p) {
     return new ProjectDto(
         p.getId(),
+        p.getOwner().getId(),
         p.getTitle(),
         p.getDescription(),
         p.getSummary(),
@@ -29,6 +32,7 @@ public record ProjectDto(
         List.copyOf(p.getRequiredTechnologies()),
         p.getMaxHourlyRate(),
         p.getRepositoryUrl(),
+        p.getApiContract(),
         p.getCreatedAt());
   }
 }

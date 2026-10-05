@@ -11,4 +11,5 @@ public record MemberDto(
     DeveloperRole role,
     Availability availability,
     boolean owner,
+    String assignedRole,
     Instant joinedAt) {}

@@ -10,6 +10,7 @@ public record InvitationDto(
     Long inviterId,
     Long inviteeId,
     InvitationStatus status,
+    String assignedRole,
     Instant createdAt,
     Instant respondedAt) {
   public static InvitationDto from(Invitation invitation) {
@@ -20,6 +21,7 @@ public record InvitationDto(
         invitation.getInviter().getId(),
         invitation.getInvitee().getId(),
         invitation.getStatus(),
+        invitation.getAssignedRole(),
         invitation.getCreatedAt(),
         invitation.getRespondedAt());
   }

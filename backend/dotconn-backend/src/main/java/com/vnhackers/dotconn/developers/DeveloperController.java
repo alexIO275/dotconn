@@ -37,6 +37,7 @@ public class DeveloperController {
     Specification<DeveloperProfile> spec =
         (root, query, cb) -> {
           var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+          predicates.add(cb.isNotNull(root.get("role")));
           if (roleFilter != null) {
             predicates.add(cb.equal(root.get("role"), roleFilter));
           }

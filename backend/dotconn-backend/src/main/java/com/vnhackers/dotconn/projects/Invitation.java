@@ -13,13 +13,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 
 @Entity
 @Table(
     name = "project_invitations",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "invitee_id"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "developer_id"}))
 public class Invitation {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +31,11 @@ public class Invitation {
   @JoinColumn(name = "project_id")
   private Project project;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "inviter_id")
+  @Transient
   private User inviter;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "invitee_id")
+  @JoinColumn(name = "developer_id")
   private User invitee;
 
   @Enumerated(EnumType.STRING)
@@ -45,6 +46,16 @@ public class Invitation {
   private Instant createdAt = Instant.now();
 
   private Instant respondedAt;
+
+  @Column(nullable = false)
+  private Instant updatedAt = Instant.now();
+
+  @Column(length = 20)
+  private String assignedRole;
+
+  @PreUpdate
+  void updateTimestamp() { updatedAt = Instant.now(); }
+
 
   protected Invitation() {}
 
@@ -63,12 +74,16 @@ public class Invitation {
   }
 
   public User getInviter() {
-    return inviter;
+    return inviter == null ? project.getOwner() : inviter;
   }
 
   public User getInvitee() {
     return invitee;
   }
+
+  public String getAssignedRole() { return assignedRole; }
+
+  public void setAssignedRole(String assignedRole) { this.assignedRole = assignedRole; }
 
   public InvitationStatus getStatus() {
     return status;

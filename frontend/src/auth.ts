@@ -1,7 +1,14 @@
-let session: { token: string; expiresAt: number } | null = null;
-export function clearSession() { session = null; }
+type Session = { token: string; expiresAt: number };
+const storageKey = 'microcrew-session';
+let session: Session | null = null;
+try { const value = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); if (value && typeof value.token === 'string' && typeof value.expiresAt === 'number') session = value; } catch { sessionStorage.removeItem(storageKey); }
+export function clearSession() { session = null; sessionStorage.removeItem(storageKey); }
+export function currentUser(): {id:number;email:string} | null {
+  const token = getToken(); if (!token) return null;
+  try { const part = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); const data=JSON.parse(atob(part)); const id=Number(data.sub); return Number.isSafeInteger(id)&&id>0 ? {id,email:String(data.email||'')} : null; } catch { return null; }
+}
 export function getToken(): string | null {
-  if (!session || Date.now() >= session.expiresAt) { session = null; return null; }
+  if (!session || Date.now() >= session.expiresAt) { clearSession(); return null; }
   return session.token;
 }
 export async function authenticate(mode: 'login' | 'signup', email: string, password: string): Promise<void> {
@@ -16,6 +23,7 @@ export async function authenticate(mode: 'login' | 'signup', email: string, pass
     const data = await response.json();
     if (typeof data.token !== 'string' || !data.token || typeof data.expiresInSeconds !== 'number' || data.expiresInSeconds <= 0) throw new Error('Răspuns invalid de la server.');
     session = { token: data.token, expiresAt: Date.now() + data.expiresInSeconds * 1000 };
+    sessionStorage.setItem(storageKey, JSON.stringify(session));
   } catch (error) {
     if (controller.signal.aborted) throw new Error('Serverul nu a răspuns la timp. Încearcă din nou.');
     if (error instanceof TypeError) throw new Error('Nu se poate contacta backendul. Verifică dacă este pornit.');

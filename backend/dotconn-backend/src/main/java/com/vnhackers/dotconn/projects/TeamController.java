@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
+@Transactional(readOnly = true)
 public class TeamController {
   private final ProjectAccessService access;
   private final InvitationRepository invitations;
@@ -65,6 +67,7 @@ public class TeamController {
   }
 
   // Asamblează automat echipa: doar proprietarul poate invita în bloc din recomandări.
+  @Transactional
   @PostMapping("/api/projects/{id}/auto-assemble")
   @ResponseStatus(HttpStatus.CREATED)
   public List<InvitationDto> autoAssemble(
@@ -72,10 +75,22 @@ public class TeamController {
       @PathVariable Long id,
       @Valid @RequestBody(required = false) AutoAssembleRequest req) {
     Long userId = currentUserId(jwt);
-    Project project = access.requireOwner(id, userId);
     int max = req == null || req.maxInvitations() == null ? 5 : req.maxInvitations();
     int minScore = req == null || req.minScore() == null ? 30 : req.minScore();
-    return assembly.autoAssemble(project, max, minScore);
+    return assembly.autoAssemble(id, userId, max, minScore);
+  }
+
+  @GetMapping("/api/projects/{id}/team-proposals")
+  public TeamProposalsDto teamProposals(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    return assembly.proposals(id, currentUserId(jwt));
+  }
+
+  @Transactional
+  @PostMapping("/api/projects/{id}/team-invitations")
+  public TeamInvitationResult inviteTeam(
+      @AuthenticationPrincipal Jwt jwt, @PathVariable Long id,
+      @Valid @RequestBody TeamInvitationRequest req) {
+    return assembly.inviteTeam(id, currentUserId(jwt), req);
   }
 
   private List<MemberDto> listMembers(Project project) {
@@ -89,6 +104,7 @@ public class TeamController {
             ownerProfile == null ? null : ownerProfile.getRole(),
             ownerProfile == null ? null : ownerProfile.getAvailability(),
             true,
+            null,
             project.getCreatedAt()));
     invitations.findByProjectIdAndStatus(project.getId(), InvitationStatus.ACCEPTED).stream()
         .sorted(
@@ -105,6 +121,7 @@ public class TeamController {
                       profile == null ? null : profile.getRole(),
                       profile == null ? null : profile.getAvailability(),
                       false,
+                      inv.getAssignedRole(),
                       inv.getRespondedAt() == null ? inv.getCreatedAt() : inv.getRespondedAt()));
             });
     return members;

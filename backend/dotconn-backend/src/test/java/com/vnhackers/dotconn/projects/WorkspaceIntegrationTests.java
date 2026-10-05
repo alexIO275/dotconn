@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.vnhackers.dotconn.user.User;
+import com.vnhackers.dotconn.developers.DeveloperProfileRepository;
 import com.vnhackers.dotconn.user.UserRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,11 +33,13 @@ class WorkspaceIntegrationTests {
 
   @Autowired WebApplicationContext context;
   @Autowired UserRepository users;
+  @Autowired DeveloperProfileRepository profiles;
   private MockMvc mvc;
   private final JsonMapper mapper = JsonMapper.builder().build();
 
   @BeforeEach
   void setup() {
+    profiles.deleteAll(); // Keep recommendations independent from fixtures created by other tests.
     mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   }
 

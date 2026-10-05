@@ -4,7 +4,9 @@ package com.vnhackers.dotconn.projects;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import java.math.BigDecimal;
 
 public record UpdateProjectRequest(
@@ -14,12 +16,16 @@ public record UpdateProjectRequest(
     @Size(max = 1000, message = "Rezumatul poate avea cel mult 1000 de caractere.") String summary,
     @Size(max = 500, message = "Linkul repository-ului poate avea cel mult 500 de caractere.")
         @Pattern(
-            regexp = "^https://\\S+$",
-            message = "Linkul repository-ului trebuie să fie o adresă https validă.")
+            regexp = "^$|^https?://\\S+$",
+            message = "Linkul repository-ului trebuie să fie o adresă http sau https validă.")
         String repositoryUrl,
     @DecimalMin(value = "0.0", message = "Bugetul nu poate fi negativ.")
         @Digits(
             integer = 8,
             fraction = 2,
             message = "Bugetul trebuie să aibă cel mult 8 cifre întregi și 2 zecimale.")
-        BigDecimal maxHourlyRate) {}
+        BigDecimal maxHourlyRate,
+    Boolean clearMaxHourlyRate,
+    @Size(max = 10000) String apiContract,
+    @Size(min = 1, max = 8) List<@NotBlank @Pattern(regexp = "frontend|backend|full-stack|mobile|devops|qa|data|security") String> roles,
+    @Size(max = 20) List<@Size(max = 50) String> requiredTechnologies) {}

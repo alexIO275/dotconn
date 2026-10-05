@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/projects/{id}/tasks")
+@Transactional
 public class TaskController {
   private final ProjectTaskRepository tasks;
   private final UserRepository users;
@@ -104,7 +106,8 @@ public class TaskController {
     if (req.status() != null) {
       task.setStatus(req.status());
     }
-    if (req.assigneeId() != null) {
+    if (Boolean.TRUE.equals(req.clearAssignee())) task.setAssignee(null);
+    else if (req.assigneeId() != null) {
       task.setAssignee(resolveAssignee(id, req.assigneeId()));
     }
     return TaskDto.from(tasks.save(task));

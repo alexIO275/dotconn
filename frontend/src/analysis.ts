@@ -1,3 +1,4 @@
+import { setDraft } from './pages';
 import { getToken, clearSession } from './auth';
 interface Analysis { summary: string; roles: string[]; tasks: string[]; existingStack: string[]; missingInformation: string[] }
 const roleNames: Record<string, string> = { frontend: 'Frontend', backend: 'Backend', 'full-stack': 'Full-stack', mobile: 'Mobile', devops: 'DevOps', qa: 'QA / testare', data: 'Date', security: 'Securitate' };
@@ -6,7 +7,7 @@ function isAnalysis(value: unknown): value is Analysis {
   const item = value as Record<string, unknown>;
   return typeof item.summary === 'string' && ['roles', 'tasks', 'existingStack', 'missingInformation'].every(key => Array.isArray(item[key]) && (item[key] as unknown[]).every(v => typeof v === 'string'));
 }
-export function setupAnalysis() {
+export function setupAnalysis(root: HTMLElement) {
   const form = document.querySelector<HTMLFormElement>('#analysis-form')!;
   const input = document.querySelector<HTMLTextAreaElement>('#project')!;
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
@@ -20,12 +21,13 @@ export function setupAnalysis() {
     if (!form.reportValidity()) return;
     const token = getToken();
     if (!token) { status.textContent = 'Intră în cont sau creează un cont pentru a analiza proiectul.'; return; }
+    const description = input.value.trim();
     const controller = new AbortController();
     pending = true; button.disabled = true; button.textContent = 'Se analizează…';
     status.textContent = ''; result.hidden = true;
     const timer = setTimeout(() => controller.abort(), 40000);
     try {
-      const response = await fetch('/api/project-analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, credentials: 'same-origin', body: JSON.stringify({ description: input.value.trim() }), signal: controller.signal });
+      const response = await fetch('/api/project-analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, credentials: 'same-origin', body: JSON.stringify({ description }), signal: controller.signal });
       if (!response.ok) {
         if (response.status === 401) clearSession();
         let message = response.status === 401 || response.status === 403 ? 'Sesiunea a expirat sau accesul a fost refuzat. Intră din nou în cont.' : 'Analiza nu este disponibilă. Verifică dacă backendul este pornit și Groq este configurat.';
@@ -33,6 +35,7 @@ export function setupAnalysis() {
         throw new Error(message);
       }
       const data: unknown = await response.json();
+      if (!root.isConnected) return;
       if (!isAnalysis(data)) throw new Error('Serverul a returnat un rezultat invalid.');
       result.replaceChildren();
       const heading = document.createElement('h2'); heading.textContent = 'Pentru proiectul tău'; result.append(heading);
@@ -44,6 +47,8 @@ export function setupAnalysis() {
         values.forEach(value => { const li = document.createElement('li'); li.textContent = value; list.append(li); });
         result.append(label, list);
       }
+      const save = document.createElement('a'); save.href='/projects/new'; save.className='auth register'; save.textContent='Verifică și salvează proiectul';
+      save.addEventListener('click',()=>setDraft({description,summary:data.summary,roles:data.roles,tasks:data.tasks,existingStack:data.existingStack})); result.append(save);
       result.hidden = false; status.textContent = 'Verifică analiza înainte să cauți un coleg.';
     } catch (error) {
       status.textContent = controller.signal.aborted ? 'Analiza a durat prea mult. Încearcă din nou.' : error instanceof Error ? error.message : 'Analiza nu a putut fi finalizată.';

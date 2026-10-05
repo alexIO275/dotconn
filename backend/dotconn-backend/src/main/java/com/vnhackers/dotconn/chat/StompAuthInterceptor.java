@@ -37,8 +37,11 @@ public class StompAuthInterceptor implements ChannelInterceptor {
       }
       // /user/queue/... e rezolvat de Spring la coada acestei sesiuni, deci nimeni nu poate asculta mesajele altuia.
       String destination = accessor.getDestination();
+      if (command == StompCommand.SEND && !"/app/chat.send".equals(destination)) {
+        throw new MessageDeliveryException("Trimitere nepermisă.");
+      }
       if (command == StompCommand.SUBSCRIBE
-          && (destination == null || !destination.startsWith("/user/queue/"))) {
+          && !java.util.Set.of("/user/queue/messages", "/user/queue/read", "/user/queue/errors").contains(destination == null ? "" : destination)) {
         throw new MessageDeliveryException("Abonare nepermisă: " + destination);
       }
     }

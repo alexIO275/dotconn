@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 public class InvitationController {
@@ -35,6 +36,7 @@ public class InvitationController {
   }
 
   // Doar proprietarul proiectului poate invita.
+  @Transactional
   @PostMapping("/api/projects/{id}/invitations")
   @ResponseStatus(HttpStatus.CREATED)
   public InvitationDto invite(
@@ -42,11 +44,9 @@ public class InvitationController {
       @PathVariable Long id,
       @Valid @RequestBody CreateInvitationRequest req) {
     Long ownerId = currentUserId(jwt);
-    Project project =
-        projects
-            .findByIdAndOwnerId(id, ownerId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
+    Project project = projects.findByIdForUpdate(id)
+        .filter(p -> p.getOwner().getId().equals(ownerId))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
 
     User invitee =
         users
@@ -93,17 +93,19 @@ public class InvitationController {
   }
 
   // Doar invitatul își poate accepta/refuza invitația, și doar cât e în așteptare.
+  @Transactional
   @PatchMapping("/api/invitations/{id}")
   public InvitationDto respond(
       @AuthenticationPrincipal Jwt jwt,
       @PathVariable Long id,
       @Valid @RequestBody InvitationActionRequest req) {
     Long userId = currentUserId(jwt);
-    Invitation invitation =
-        invitations
-            .findByIdAndInviteeId(id, userId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitația nu a fost găsită."));
+    Long projectId = invitations.findProjectIdForInvitee(id, userId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitația nu a fost găsită."));
+    projects.findByIdForUpdate(projectId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proiectul nu a fost găsit."));
+    Invitation invitation = invitations.findForResponse(id, userId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitația nu a fost găsită."));
     if (invitation.getStatus() != InvitationStatus.PENDING) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Invitația a fost deja procesată.");

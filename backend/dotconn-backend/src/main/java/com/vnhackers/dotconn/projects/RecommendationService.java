@@ -33,7 +33,8 @@ public class RecommendationService {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
     List<RecommendationDto> scored = new ArrayList<>();
-    for (DeveloperProfile profile : profiles.findAll()) {
+    for (DeveloperProfile profile : profiles.findAllWithTechnologies()) {
+      if (profile.getRole() == null || profile.getId().equals(project.getOwner().getId())) continue;
       int rolePoints = rolePoints(profile.getRole(), wantedRoles);
       SkillMatch skills = skillPoints(profile.getTechnologies(), required);
       // Fără suprapunere pe rol și pe competențe, profilul nu e relevant —
@@ -160,8 +161,10 @@ public class RecommendationService {
     } else {
       reasons.add("Disponibilitate neconfirmată.");
     }
-    if (project.getMaxHourlyRate() == null || profile.getHourlyRate() == null) {
-      reasons.add("Buget compatibil (fără limită specificată).");
+    if (project.getMaxHourlyRate() == null) {
+      reasons.add("Fără limită de tarif specificată.");
+    } else if (profile.getHourlyRate() == null) {
+      reasons.add("Tarif neconfirmat; limita proiectului este " + project.getMaxHourlyRate() + " pe oră.");
     } else if (budgetPoints > 0) {
       reasons.add(
           "Tarif "
